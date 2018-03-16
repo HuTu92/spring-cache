@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    scan="true" - 扫描配置文件中的更改并自动重新配置
+    scanPeriod - 指定不同的扫描周期，默认情况下，配置文件将每分钟扫描一次更改。
+                    注意如果没有指定时间单位，则时间单位被认为是毫秒
+    当您将scan属性设置为true时，将会安装ReconfigureOnChangeTask。这个任务运行在一个单独的线程中，将检查你的配置文件是否已经改变。 ReconfigureOnChangeTask将自动监视任何包含的文件。
+    由于在编辑配置文件时很容易出错，如果配置文件的最新版本有XML语法错误，它将回退到以前没有XML语法错误的配置文件。
+-->
+
+<configuration scan="true" scanPeriod="30 seconds" debug="true">
+
+    <!--
+        它将对任何Logback-classic logger level所做的更改传播到java.util.Logging框架中。
+    -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <!-- To enable JMX Management -->
+    <jmxConfigurator/>
+
+    <!-- 时间戳定义，timeReference：使用日志产生日期为时间基准 -->
+    <timestamp key="byDay" datePattern="yyyy-MM-dd" timeReference="contextBirth" />
+
+    <!--定义日志文件的存储地址，可以使用系统变量 -->
+    <property name="LOG_HOME" value="${user.home}/logs/websocketApp" />
+
+    <!-- 控制台输出，生产环境将stdout去掉 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度，%msg：日志消息，%n是换行符 -->
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- 按照每天生成日志文件 -->
+    <appender name="FILE-DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 日志输出文件 -->
+        <file>${LOG_HOME}/DEBUG-${byDay}.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY </onMismatch>
+        </filter>
+        <!-- timebasedrollingpolicy：时间和大小为基础的日志文件归档 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 归档的日志文件的路径，例如今天是2013-12-21，当前写的日志文件路径为file节点指定。 -->
+            <!--可以将此文件与file指定文件路径设置为不同路径，从而将当前日志文件或归档日志文件置不同的目录。 -->
+            <!--而2013-12-21的日志文件由fileNamePattern指定。%d{yyyy-MM-dd}指定日期格式，%i指定索引 -->
+            <fileNamePattern>${LOG_HOME}/DEBUG/DEBUG-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+
+            <!-- 控制归档文件的最大数量的保存，删除旧的文件，默认单位天数 -->
+            <maxHistory>30</maxHistory>
+
+            <!-- 设置当前日志的文件的大小，决定日志翻滚 -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- 除按日志记录之外，还配置了日志文件不能超过100M，若超过100M，日志文件会以索引0开始， -->
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE-INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/INFO-${byDay}.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY </onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/INFO/INFO-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE-ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/ERROR-${byDay}.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY </onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/ERROR/ERROR-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <logger name="java.sql.Connection">
+        <level value="DEBUG" />
+    </logger>
+    <logger name="java.sql.Statement">
+        <level value="DEBUG" />
+    </logger>
+    <logger name="java.sql.PreparedStatement">
+        <level level="DEBUG"/>
+    </logger>
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE-DEBUG" />
+        <appender-ref ref="FILE-INFO" />
+        <appender-ref ref="FILE-ERROR" />
+    </root>
+</configuration>
